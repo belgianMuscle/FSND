@@ -24,6 +24,7 @@ db = SQLAlchemy(app)
 
 # TODO: connect to a local postgresql database
 #db.connect blablabla
+#here I add some changes
 
 #----------------------------------------------------------------------------#
 # Models.
