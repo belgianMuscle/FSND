@@ -6,9 +6,13 @@
 		<h1 class="monospace">
 			{{ artist.name }}
 		</h1>
-		<p class="subtitle">
-			ID: {{ artist.id }}
-		</p>
+		<div>
+			<p class="subtitle">
+				ID: {{ artist.id }}
+			</p>
+			<a href="/artists/{{artist.id}}/edit">Edit Artist</a>
+			<button type="submit" id="delete_artist" class="delete-artist" data-id="{{artist.id}}">Remove artist &cross;</button>
+		</div>
 		<div class="genres">
 			{% for genre in artist.genres %}
 			<span class="genre">{{ genre }}</span>
@@ -72,5 +76,22 @@
 	</div>
 </section>
 
+<script>
+	document.getElementById('delete_artist').onclick = function(e){
+		e.preventDefault();
+		const artistId = e.target.dataset['id'];
+		fetch('/artists/'+ artistId ,{
+			method: 'DELETE',
+			body: JSON.stringify({
+			}),
+			headers: {
+				'Content-Type':'application/json'
+			}
+		}).then( function(){
+			window.location.href = '/';
+		}).catch(function(){
+		});
+	}
+</script>
 {% endblock %}
 
