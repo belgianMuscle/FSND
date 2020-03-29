@@ -6,9 +6,13 @@
 		<h1 class="monospace">
 			{{ venue.name }}
 		</h1>
-		<p class="subtitle">
-			ID: {{ venue.id }}
-		</p>
+		<div>
+			<p class="subtitle cust_subtitle">
+				ID: {{ venue.id }}
+			</p>
+			<a href="/venues/{{venue.id}}/edit">Edit Venue</a>
+			<button type="submit" id="delete_venue" class="delete-venue" data-id="{{venue.id}}">Remove venue &cross;</button>
+		</div>
 		<div class="genres">
 			{% for genre in venue.genres %}
 			<span class="genre">{{ genre }}</span>
@@ -74,6 +78,22 @@
 		{% endfor %}
 	</div>
 </section>
-
+<script>
+	document.getElementById('delete_venue').onclick = function(e){
+		e.preventDefault();
+		const venueId = e.target.dataset['id'];
+		fetch('/venues/'+ venueId ,{
+			method: 'DELETE',
+			body: JSON.stringify({
+			}),
+			headers: {
+				'Content-Type':'application/json'
+			}
+		}).then( function(){
+			window.location.href = '/';
+		}).catch(function(){
+		});
+	}
+</script>
 {% endblock %}
 

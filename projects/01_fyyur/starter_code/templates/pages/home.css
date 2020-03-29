@@ -1,3 +1,11 @@
 h1 {
 	margin-bottom: 1em;
 }
+
+.cust_subtitle{
+	display:inline;
+}
+
+.delete-venue{
+	margin:5px;
+}
