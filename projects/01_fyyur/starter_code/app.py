@@ -46,7 +46,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(120))
     genres = db.Column(db.String(120))
-    shows = db.relationship('Show', lazy=True, backref='venue')
+    shows = db.relationship('Show', lazy=True, cascade="all, delete-orphan", backref='venue')
 
 
 class Artist(db.Model):
@@ -65,8 +65,8 @@ class Artist(db.Model):
     seeking_description = db.Column(db.String(120))
     available_from = db.Column(db.DateTime, nullable=False)
     available_to = db.Column(db.DateTime, nullable=False)
-    shows = db.relationship('Show', lazy=True, backref='artist')
-    albums = db.relationship('Album',lazy=True, backref='artist')
+    shows = db.relationship('Show', lazy=True, cascade="all, delete-orphan", backref='artist')
+    albums = db.relationship('Album',lazy=True, cascade="all, delete-orphan", backref='artist')
 
 class Album(db.Model):
     __tablename__ = 'Album'
@@ -126,7 +126,6 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # TODO  num_shows should be aggregated based on number of upcoming shows per venue.
     venue_result = Venue.query.order_by('city', 'state', 'name').all()
 
     data = []
@@ -508,8 +507,6 @@ def create_artist_submission():
     # called upon submitting the new artist listing form
     form = ArtistForm(request.form)
 
-    print('Creating with avail from: ', form.available_from.data)
-
     data = {
         'name': form.name.data,
         'image_link': form.image_link.data,
@@ -572,15 +569,11 @@ def add_album_submission(artist_id):
     form = AlbumForm(request.form)
     error = False
 
-    print('Im here')
     if form.validate():
-        print('validated')
         try:
             album = Album(artist_id=artist_id,
                         title=form.title.data,
                         songs=form.songs.data)
-            print('db')
-            print(album)
             db.session.add(album)
             db.session.commit()
         except:
