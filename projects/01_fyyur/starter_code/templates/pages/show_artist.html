@@ -10,8 +10,10 @@
 			<p class="subtitle">
 				ID: {{ artist.id }}
 			</p>
+			<p>
 			<a href="/artists/{{artist.id}}/edit">Edit Artist</a>
 			<button type="submit" id="delete_artist" class="delete-artist" data-id="{{artist.id}}">Remove artist &cross;</button>
+			</p>
 		</div>
 		<div class="genres">
 			{% for genre in artist.genres %}
@@ -29,8 +31,13 @@
 		</p>
 		<p>
 			<i class="fab fa-facebook-f"></i> {% if artist.facebook_link %}<a href="{{ artist.facebook_link }}" target="_blank">{{ artist.facebook_link }}</a>{% else %}No Facebook Link{% endif %}
-        </p>
+		</p>
+
 		{% if artist.seeking_venue %}
+
+		<p>
+			Availability from: {{ artist.available_from|datetime('medium') }} to: {{ artist.available_to|datetime('medium') }}
+		</p>
 		<div class="seeking">
 			<p class="lead">Currently seeking performance venues</p>
 			<div class="description">
@@ -47,6 +54,33 @@
 		<img src="{{ artist.image_link }}" alt="Venue Image" />
 	</div>
 </div>
+<section>
+	<div>
+		<h2 class="monospace">Discrography</h2>
+		<a href="/artists/{{artist.id}}/add_album"><button class="btn btn-primary btn-lg">Add Album</button></a>
+	</div>
+		{% if artist.albums|length > 0 %}
+		<div class="row">
+			{% for album in artist.albums %}
+			<div class="col-sm-2">
+				<div class="tile">
+					<h4>
+						{{album.title}}
+					</h4>
+					<ul>
+						{% set song_list = album.songs.split(',') %}
+						{% for song in song_list %}
+							<li>{{song}}</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	{% else %}
+		<p>No albums were found for this artist.</p>
+	{% endif %}
+</section>
 <section>
 	<h2 class="monospace">{{ artist.upcoming_shows_count }} Upcoming {% if artist.upcoming_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">

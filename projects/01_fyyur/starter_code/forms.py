@@ -1,24 +1,33 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms.validators import DataRequired, AnyOf, URL, ValidationError
 
 class ShowForm(Form):
     artist_id = StringField(
-        'artist_id'
+        'artist_id',
+        validators=[DataRequired()]
     )
     venue_id = StringField(
-        'venue_id'
+        'venue_id',
+        validators=[DataRequired()]
     )
     start_time = DateTimeField(
         'start_time',
         validators=[DataRequired()],
         default= datetime.today()
     )
+
+class AlbumForm(Form):
+    title = StringField(
+        'title',
+        validators=[DataRequired()]
+    )
     
-    def validate_start_time(form,field):
-        if field.data < datetime.today():
-            raise ValidationError("Start Time must be later than today.")
+    songs = StringField(
+        'songs',
+        validators=[DataRequired()]
+    )
 
 class VenueForm(Form):
     name = StringField(
@@ -194,14 +203,12 @@ class ArtistForm(Form):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
         'phone'
     )
     image_link = StringField(
         'image_link', validators=[URL()]
     )
     genres = SelectMultipleField(
-        # TODO implement enum restriction
         'genres', validators=[DataRequired()],
         choices=[
             ('Alternative', 'Alternative'),
@@ -231,11 +238,17 @@ class ArtistForm(Form):
     seeking_description = StringField(
         'seeking_description'
     )
+    available_from = DateTimeField(
+        'available_from',
+        default=datetime.today()
+    )
+    available_to = DateTimeField(
+        'available_to',
+        default=datetime.today() + timedelta(1)
+    )
     website = StringField(
         'website', validators=[URL()]
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
     )
-
-# TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
