@@ -44,6 +44,27 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['categories'])
         self.assertTrue(data['current_category'])
 
+    def test_delete_question(self):
+        res = self.client().delete('/questions/4')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+    
+    def test_create_question(self):
+        res = self.client().post('/questions',data=json.dumps({
+            'question':'Unit test',
+            'answer':'test',
+            'difficulty':3,
+            'category':'4'
+        }),content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['question'])
+
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

@@ -13,6 +13,9 @@ def create_app(test_config=None):
   app = Flask(__name__)
   setup_db(app)
   
+  app.config['DEBUG'] = True 
+  app.config['TESTING'] = True
+
   '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   @TODO: Use the after_request decorator to set Access-Control-Allow
@@ -78,6 +81,19 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  @app.route('/questions/<question_id>',methods=['DELETE'])
+  def delete_question(question_id):
+
+    question = Question.query.get(question_id)
+
+    if not question:
+          abort(404)
+
+    question.delete()
+
+    return jsonify({
+      'success':True
+    })
 
   '''
   @TODO: 
@@ -89,6 +105,18 @@ def create_app(test_config=None):
   the form will clear and the question will appear at the end of the last page
   of the questions list in the "List" tab.  
   '''
+  @app.route('/questions',methods=['POST'])
+  def create_question():
+    data = request.get_json()
+
+    question = Question(data['question'],data['answer'],data['difficulty'],data['category'])
+
+    question.insert()
+
+    return jsonify({
+      'success':True,
+      'question':question
+    })
 
   '''
   @TODO: 
@@ -129,45 +157,45 @@ def create_app(test_config=None):
   including 404 and 422. 
   '''
   @app.errorhandler(404)
-    def not_found(error):
-        return jsonify({
-            'success': False,
-            'message': 'resource not found',
-            'error':404
-        }),404
+  def not_found(error):
+      return jsonify({
+          'success': False,
+          'message': 'Resource not found',
+          'error':404
+      }),404
 
-    @app.errorhandler(405)
-    def not_found(error):
-        return jsonify({
-            'success':False,
-            'message':'Method not allowed',
-            'error':405
-        }),405
+  @app.errorhandler(405)
+  def not_found(error):
+      return jsonify({
+          'success':False,
+          'message':'Method not allowed',
+          'error':405
+      }),405
 
-    @app.errorhandler(422)
-    def unprocessable(error):
-        return jsonify({
-            'success':False,
-            'message':'resource cannot be processed',
-            'error':422
-        }),422
+  @app.errorhandler(422)
+  def unprocessable(error):
+      return jsonify({
+          'success':False,
+          'message':'Resource cannot be processed',
+          'error':422
+      }),422
 
 
-    @app.errorhandler(400)
-    def bad_request(error):
-        return jsonify({
-            'success':False,
-            'message':'bad reqeust',
-            'error':400
-        }),400
+  @app.errorhandler(400)
+  def bad_request(error):
+      return jsonify({
+          'success':False,
+          'message':'Bad reqeust',
+          'error':400
+      }),400
 
-    @app.errorhandler(500)
-    def bad_request(error):
-        return jsonify({
-            'success':False,
-            'message':'Request not allowed',
-            'error':500
-        }),500
+  @app.errorhandler(500)
+  def bad_request(error):
+      return jsonify({
+          'success':False,
+          'message':'Request not allowed',
+          'error':500
+      }),500
   
   return app
 
