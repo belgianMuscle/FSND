@@ -28,7 +28,7 @@
   display: flex;
   flex-direction: row;
   height: 30px;
-  width: 200px;
+  width: 300px;
   align-items: center;
   justify-content: space-between;
 }
@@ -36,6 +36,10 @@
 .Question {
   font-size: 21px;
   width: 100%;
+}
+
+.checked {
+  color: orange;
 }
 
 .answer-holder {

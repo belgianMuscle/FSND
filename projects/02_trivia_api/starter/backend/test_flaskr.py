@@ -30,9 +30,17 @@ class TriviaTestCase(unittest.TestCase):
         pass
 
     """
-    TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+
+    def test_get_categories(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['categories'])
+
     def test_get_questions(self):
         res = self.client().get('/questions?page=1')
         data = json.loads(res.data)
@@ -42,10 +50,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['questions'])
         self.assertTrue(data['total_questions'])
         self.assertTrue(data['categories'])
-        self.assertTrue(data['current_category'])
+        self.assertTrue(data['current_category']=='')
 
     def test_delete_question(self):
-        res = self.client().delete('/questions/4')
+        res = self.client().delete('/questions/2')
         data = json.loads(res.data)
         
         self.assertEqual(res.status_code, 200)
@@ -64,7 +72,95 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'],True)
         self.assertTrue(data['question'])
 
+    def test_get_question_for_category(self):
+        res = self.client().get('/categories/4/questions')
+        data = json.loads(res.data)
 
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['questions'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['current_category'])
+        self.assertTrue(len(data['questions'])==data['total_questions'])
+
+    def test_search_questions(self):
+        res = self.client().post('/questions/search',data=json.dumps({
+            'searchTerm':'test'
+        }), content_type="application/json")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['questions'])
+        self.assertTrue(data['total_questions'])
+        self.assertTrue(data['search_term'])
+        self.assertTrue(data['current_category']=='')
+        self.assertTrue(len(data['questions'])==data['total_questions'])
+    
+    def test_quizzes(self):
+        res = self.client().post('/quizzes',data=json.dumps({
+            'previous_questions':[1,2,3],
+            'quiz_category':{'id':'4'}
+        }), content_type="application/json")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['question'])
+
+    def test_create_category(self):
+        res = self.client().post('/categories',data=json.dumps({
+            'type':'Unit test'
+        }),content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['category'])
+
+    def test_rate_question(self):
+        res = self.client().patch('/questions/5',data=json.dumps({
+            'new_rating':4
+        }),content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['question'])
+
+
+    def test_create_player(self):
+        res = self.client().post('/players',data=json.dumps({
+            'player_name':'Unittest'
+        }),content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['player'])
+
+    
+    def test_get_player(self):
+        res = self.client().post('/players',data=json.dumps({
+            'player_name':'Unittest'
+        }),content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['player'])
+
+    
+    def test_update_player_score(self):
+        res = self.client().patch('/players',data=json.dumps({
+            'player':{'id':1,'name':'Unittest'},
+            'score_played':3
+        }),content_type='application/json')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'],True)
+        self.assertTrue(data['player'])
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

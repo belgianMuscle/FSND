@@ -5,6 +5,29 @@ import '../stylesheets/QuizView.css';
 
 const questionsPerPlay = 5; 
 
+function PlayerScore(props){
+  return(
+    <div>
+      <h2>{props.player.name}</h2>
+      <div className="final-header">Your Final Score is {props.numCorrect}/5</div>
+      <div className="final-header">You have played {props.player.games_played} games with a total score of {props.player.total_score}</div>
+    </div>
+  )
+}
+
+function GuesScore(props){
+  return(
+    <div className="final-header">Your Final Score is {props.numCorrect}/5</div>
+  )
+}
+
+function ScoreView(props){
+  if(props.player_name !== ''){
+    return <PlayerScore numCorrect={props.numCorrect} player={props.player}/>;
+  }else{
+    return <GuesScore numCorrect={props.numCorrect}/>;
+  }
+}
 class QuizView extends Component {
   constructor(props){
     super();
@@ -16,13 +39,16 @@ class QuizView extends Component {
         numCorrect: 0,
         currentQuestion: {},
         guess: '',
-        forceEnd: false
+        forceEnd: false,
+        player_name:'',
+        player: {},
+        finalRendered: false
     }
   }
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `/categories`, 
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
@@ -35,7 +61,57 @@ class QuizView extends Component {
     })
   }
 
+  updatePlayerScore = () => {
+    if(this.state.player_name !== ''){
+      $.ajax({
+        url: `/players`, 
+        type: "PATCH",
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          player: this.state.player,
+          score_played: this.state.numCorrect
+        }),
+        xhrFields: {
+          withCredentials: true
+        },
+        crossDomain: true,
+        success: (result) => {
+          this.setState({ player: result.player })
+          return;
+        },
+        error: (error) => {
+          alert('Unable to update player. Please try your request again')
+          return;
+        }
+      })    
+    }  
+  }
+
   selectCategory = ({type, id=0}) => {
+    if(this.state.player_name !== ''){
+      $.ajax({
+        url: `/players`, 
+        type: "POST",
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          player_name: this.state.player_name
+        }),
+        xhrFields: {
+          withCredentials: true
+        },
+        crossDomain: true,
+        success: (result) => {
+          this.setState({ player: result.player })
+          return;
+        },
+        error: (error) => {
+          alert('Unable to load player. Please try your request again')
+          return;
+        }
+      })    
+    }
     this.setState({quizCategory: {type, id}}, this.getNextQuestion)
   }
 
@@ -48,7 +124,7 @@ class QuizView extends Component {
     if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
 
     $.ajax({
-      url: '/quizzes', //TODO: update request URL
+      url: '/quizzes',
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -99,9 +175,18 @@ class QuizView extends Component {
     })
   }
 
+  handleChange = (event) => {
+    this.setState({[event.target.name]: event.target.value})
+  }
+
   renderPrePlay(){
       return (
           <div className="quiz-play-holder">
+              <div className="choose-header">Enter Player name</div>
+              <label>
+                Player name
+                <input type="text" name="player_name" onChange={this.handleChange}/>
+              </label>
               <div className="choose-header">Choose Category</div>
               <div className="category-holder">
                   <div className="play-category" onClick={this.selectCategory}>ALL</div>
@@ -122,9 +207,15 @@ class QuizView extends Component {
   }
 
   renderFinalScore(){
+
+    if(!this.state.finalRendered){
+      this.updatePlayerScore();
+      this.setState({ finalRendered: true });
+    }
+
     return(
       <div className="quiz-play-holder">
-        <div className="final-header"> Your Final Score is {this.state.numCorrect}</div>
+        <ScoreView player_name={this.state.player_name} player={this.state.player} numCorrect={this.state.numCorrect}/>
         <div className="play-again button" onClick={this.restartGame}> Play Again? </div>
       </div>
     )

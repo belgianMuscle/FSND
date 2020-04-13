@@ -23,7 +23,7 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `/questions?page=${this.state.page}`, //TODO: update request URL
+      url: `/questions?page=${this.state.page}`, 
       type: "GET",
       success: (result) => {
         this.setState({
@@ -60,7 +60,7 @@ class QuestionView extends Component {
 
   getByCategory= (id) => {
     $.ajax({
-      url: `/categories/${id}/questions`, //TODO: update request URL
+      url: `/categories/${id}/questions`, 
       type: "GET",
       success: (result) => {
         this.setState({
@@ -78,7 +78,7 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-      url: `/questions`, //TODO: update request URL
+      url: `/questions/search`, 
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -105,7 +105,7 @@ class QuestionView extends Component {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
         $.ajax({
-          url: `/questions/${id}`, //TODO: update request URL
+          url: `/questions/${id}`, 
           type: "DELETE",
           success: (result) => {
             this.getQuestions();
@@ -117,6 +117,27 @@ class QuestionView extends Component {
         })
       }
     }
+  }
+
+  questionRating = (id) => (question_rating) => {
+    $.ajax({
+      url: `/questions/${id}`, 
+      type: "PATCH",
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify({new_rating: question_rating}),
+      xhrFields: {
+        withCredentials: true
+      },
+      crossDomain: true,
+      success: (result) => {
+        this.getQuestions();
+      },
+      error: (error) => {
+        alert('Unable to update question. Please try your request again')
+        return;
+      }
+    })
   }
 
   render() {
@@ -135,7 +156,7 @@ class QuestionView extends Component {
           <Search submitSearch={this.submitSearch}/>
         </div>
         <div className="questions-list">
-          <h2>Questions</h2>
+          <h2>Questions {this.state.categories[this.state.currentCategory]}</h2>
           {this.state.questions.map((q, ind) => (
             <Question
               key={q.id}
@@ -143,6 +164,8 @@ class QuestionView extends Component {
               answer={q.answer}
               category={this.state.categories[q.category]} 
               difficulty={q.difficulty}
+              question_rating={q.rating}
+              questionRating={this.questionRating(q.id)}
               questionAction={this.questionAction(q.id)}
             />
           ))}

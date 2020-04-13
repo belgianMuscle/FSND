@@ -32,12 +32,18 @@ class Question(db.Model):
   answer = Column(String)
   category = Column(String)
   difficulty = Column(Integer)
+  no_of_ratings = Column(Integer)
+  total_ratings = Column(Integer)
+  rating = Column(Integer)
 
-  def __init__(self, question, answer, category, difficulty):
+  def __init__(self, question, answer, category, difficulty,no_of_ratings=0,total_ratings=0,rating=0):
     self.question = question
     self.answer = answer
     self.category = category
     self.difficulty = difficulty
+    self.no_of_ratings = no_of_ratings
+    self.total_ratings = total_ratings
+    self.rating = rating
 
   def insert(self):
     db.session.add(self)
@@ -50,13 +56,23 @@ class Question(db.Model):
     db.session.delete(self)
     db.session.commit()
 
+  def addRating(self,newRating):
+    print(self.format())
+    self.total_ratings = self.total_ratings + newRating
+    self.no_of_ratings = self.no_of_ratings + 1
+    self.rating = self.total_ratings / self.no_of_ratings
+    db.session.commit()
+
   def format(self):
     return {
       'id': self.id,
       'question': self.question,
       'answer': self.answer,
       'category': self.category,
-      'difficulty': self.difficulty
+      'difficulty': self.difficulty,
+      'no_of_ratings':self.no_of_ratings,
+      'total_ratings':self.total_ratings,
+      'rating':self.rating
     }
 
 '''
@@ -72,8 +88,45 @@ class Category(db.Model):
   def __init__(self, type):
     self.type = type
 
+  def insert(self):
+    db.session.add(self)
+    db.session.commit()
+
   def format(self):
     return {
       'id': self.id,
       'type': self.type
+    }
+
+class Player(db.Model):
+  __tablename__ = 'players'
+
+  id = Column(Integer, primary_key=True)
+  name = Column(String(25))
+  games_played = Column(Integer)
+  total_score = Column(Integer)
+
+  def __init__(self, name, games_played=0, total_score=0):
+    self.name = name
+    self.games_played = games_played
+    self.total_score = total_score
+
+  def insert(self):
+    db.session.add(self)
+    db.session.commit()
+  
+  def addGame(self,score):
+    self.games_played = self.games_played + 1
+    self.total_score = self.total_score + score
+    db.session.commit()
+
+  def update(self):
+    db.session.commit()
+
+  def format(self):
+        return {
+      'id': self.id,
+      'name': self.name,
+      'games_played':self.games_played,
+      'total_score':self.total_score
     }
